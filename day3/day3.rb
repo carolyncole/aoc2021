@@ -9,13 +9,14 @@ def most_common(binary_list, most_common_result = "1", least_common_result = "0"
     least_common_result
   end  
 end
+
 def gama_binary(binary_list)
   length = binary_list.first.size
-  puts length
   (0..length-1).map do |index|
     most_common(binary_list.map{|number|number[index]})
   end.join
 end
+
 def epsilon_binary(gama_binary)
   gama_binary.split("").map {|char| char == '1' ? '0' : '1' }.join
 end
@@ -27,9 +28,9 @@ puts "epsilon = #{eb}"
 puts gb.to_i(2) * eb.to_i(2)
 
 def get_rating_list(binary_list, idx=0, most_common_result = "1", least_common_result = "0" )
-  return binary_list if binary_list.size == 1
+  return binary_list if binary_list.size == 1 || idx == binary_list.first.size
+
   selector = most_common(binary_list.map{|number|number[idx]}, most_common_result, least_common_result)
-  puts "selector #{selector} #{idx} #{binary_list.size}"
   binary_list = binary_list.select{|bin| bin[idx] == selector }
   get_rating_list(binary_list, idx+1, most_common_result, least_common_result)
 end
