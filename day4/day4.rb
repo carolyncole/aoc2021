@@ -22,14 +22,11 @@ class Board
 
   def initialize(numbers)
     @rows = numbers.map{|row| convert_row(row)}
-    column_numbers = []
-    numbers.transpose.each {|row| column_numbers << row.reverse}
-    @columns = column_numbers.map{|row| convert_row(row)}
+    @columns = @rows.transpose.reverse
   end
 
   def call(number)
     @rows.each{|values| values.each{|value| value.call(number)}}
-    @columns.each{|values| values.each{|value| value.call(number)}}
   end
 
   def winner?
@@ -53,12 +50,10 @@ end
 
 
 numbers_to_call = data.slice!(0).split(",").map(&:to_i)
-boards = []
-while (data.length > 5)
-  data.slice!(0) # skip line break
-  board_data = data.slice!(0, 5)
-  boards << Board.new( board_data.map{|line| line.split(" ")})
-end
+boards = data.each_slice(6).map do |data_slice|
+           board_data = data_slice.reject(&:empty?)
+           Board.new( board_data.map{|line| line.split(" ")})
+         end
 
 winning_index = 0
 numbers_to_call.each_with_index do |number_called, number_index|
