@@ -67,10 +67,6 @@ numbers_to_call.each_with_index do |number_called, number_index|
     winning_index = number_index
     break
   end
-  boards.each_with_index do |board, index|
-    puts "board #{index}"
-    puts board
-  end
 end
 
 puts winning_index
@@ -78,14 +74,18 @@ winning_board = boards.select(&:winner?).first
 puts winning_board.unmarked_sum * numbers_to_call[winning_index]
 
 
+loosing_board = nil
 numbers_to_call.each_with_index do |number_called, number_index|
   boards.each{|board| board.call(number_called)}
-  boards.any?(&:winner?)
+  if boards.count(&:winner?) == (boards.length-1)
+    loosing_board = boards.reject(&:winner?).first
+  end
+  if boards.all?(&:winner?)
     winning_index = number_index
     break
   end
-  boards.each_with_index do |board, index|
-    puts "board #{index}"
-    puts board
-  end
 end
+
+puts winning_index
+
+puts loosing_board.unmarked_sum * numbers_to_call[winning_index]
