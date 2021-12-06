@@ -25,15 +25,31 @@ class LanternFish
   end
 end
 
+##
+# Nothing above here was used for th final solution
+##
+
 school_data = File.read('day6.txt').split(",").map(&:to_i)
 
-school_of_fish = []
-school_data.each{ |days_to_spawn| school_of_fish <<  LanternFish.new(school_of_fish, days_to_spawn) }
+# school_of_fish = []
+# school_data.each{ |days_to_spawn| school_of_fish <<  LanternFish.new(school_of_fish, days_to_spawn) }
+
+school_of_fish = (0..8).map{|idx| school_data.count(idx)}
 (1..256).each do |day|
-   original_length = school_of_fish.size
-   (0..(original_length-1)).each {|idx| school_of_fish[idx].day_passes}
-   puts "Done with Day #{day}"
+   number_to_spawn = 0
+   school_of_fish.each_with_index do |number_fish, index|
+    if index == 0
+      number_to_spawn = number_fish
+    else
+      school_of_fish[index -1 ] = number_fish
+    end
+  end
+  school_of_fish[6] += number_to_spawn
+  school_of_fish[8] = number_to_spawn
+  puts "Done with Day #{day}"
 end
 
 #puts school_of_fish.join(", ")
-puts school_of_fish.size
+#puts school_of_fish.size
+puts school_of_fish.join(", ")
+puts school_of_fish.sum
