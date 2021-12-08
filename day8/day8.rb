@@ -2,19 +2,10 @@ require 'byebug'
 
 lines = File.readlines('day8.txt').map(&:chomp)
 
-counts = { 2 => {count:0, number: 1 }, 
-           3 =>{ count:0, number: 7 }, 
-           4 => {count: 0, number: 4 }, 
-           7 => {count: 0, number: 8 } }
-
-cypher = { 2 => {number: 1, letters: nil }, 
-           3 => { number: 7, letters: nil }, 
-           4 => { number: 4, letters: nil }, 
-           5 => { number: nil, letters: [] }, 
-           6 => { number: nil, letters: [] }, 
-           7 => { number: 8, letters: nil } 
-          }
-
+# counts = { 2 => {count:0, number: 1 }, 
+#            3 =>{ count:0, number: 7 }, 
+#            4 => {count: 0, number: 4 }, 
+#            7 => {count: 0, number: 8 } }
 # lines.each do |line|
 #   numerics, code_set = line.split(" | ")
 #   code_set.split(" ").each do |code| 
@@ -26,32 +17,32 @@ cypher = { 2 => {number: 1, letters: nil },
 # puts counts.values.reduce(0){|sum, value| sum+= value[:count] }
 
 numbers = lines.map do |line|
-  numerics, code_set = line.split(" | ")
+  all_nine_numbers, code_set = line.split(" | ")
  
-  cypher = { 2 => {number: 1, letters: nil }, 
+  cypher_by_length = { 2 => {number: 1, letters: nil }, 
            3 => { number: 7, letters: nil }, 
            4 => { number: 4, letters: nil }, 
            5 => { number: nil, letters: [] }, 
            6 => { number: nil, letters: [] }, 
            7 => { number: 8, letters: nil } 
           }
-  numerics.split(" ").each do |code| 
-    known_code = cypher[code.length]
+  all_nine_numbers.split(" ").each do |code| 
+    cypher_info = cypher_by_length[code.length]
     letters = code.split("").sort
-    if known_code[:number].nil?
-      known_code[:letters] << letters unless known_code[:letters].include?(letters)  
+    if cypher_info[:number].nil?
+      cypher_info[:letters] << letters unless cypher_info[:letters].include?(letters)  
     else
-      known_code[:letters] = letters if known_code[:letters].nil?
+      cypher_info[:letters] = letters if cypher_info[:letters].nil?
     end
   end
   
-  top = (cypher[3][:letters]-cypher[2][:letters]).first
-  right_bottom = ((cypher[6][:letters].reduce(&:&)) & cypher[2][:letters]).first
-  right_top = (cypher[2][:letters] - [right_bottom]).first
-  middle = ((cypher[5][:letters].reduce(&:&)) & cypher[4][:letters]).first
-  bottom =  (cypher[5][:letters].reduce(&:&) - [top] - [middle]).first
-  left_top = (cypher[4][:letters] - cypher[2][:letters] - [middle]).first
-  left_bottom = (cypher[7][:letters] - cypher[3][:letters] - cypher[4][:letters]- [bottom]).first
+  top = (cypher_by_length[3][:letters]-cypher_by_length[2][:letters]).first
+  right_bottom = ((cypher_by_length[6][:letters].reduce(&:&)) & cypher_by_length[2][:letters]).first
+  right_top = (cypher_by_length[2][:letters] - [right_bottom]).first
+  middle = ((cypher_by_length[5][:letters].reduce(&:&)) & cypher_by_length[4][:letters]).first
+  bottom =  (cypher_by_length[5][:letters].reduce(&:&) - [top] - [middle]).first
+  left_top = (cypher_by_length[4][:letters] - cypher_by_length[2][:letters] - [middle]).first
+  left_bottom = (cypher_by_length[7][:letters] - cypher_by_length[3][:letters] - cypher_by_length[4][:letters]- [bottom]).first
 
   number_key =  {
    [top,left_top,left_bottom, bottom,right_bottom, right_top].sort => 0,
@@ -68,5 +59,4 @@ numbers = lines.map do |line|
   number_key[code_set.split(" ")[0].split("").sort]*1000+ number_key[code_set.split(" ")[1].split("").sort]*100 + number_key[code_set.split(" ")[2].split("").sort]*10+ number_key[code_set.split(" ")[3].split("").sort]
 end
 
-puts numbers
 puts numbers.sum
