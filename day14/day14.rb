@@ -1,4 +1,5 @@
 require 'byebug'
+require 'date'
 data = File.readlines('day14.txt').map(&:chomp)
 
 class FormulaMapping
@@ -9,6 +10,7 @@ class FormulaMapping
   end
 
   def apply(input)
+    start_time = DateTime.now
     output = input.clone
     inserts  = []
     (0..input.length-2).each do |index|
@@ -18,7 +20,12 @@ class FormulaMapping
         inserts << { index: index+1, letter: insert }
       end
     end
+    find_time = DateTime.now
+    output = input.split
     inserts.each_with_index{|pair, index| output.insert(pair[:index]+index,pair[:letter]) }
+    end_time = DateTime.now
+    output = output.join
+    puts "Times #{start_time} #{find_time} #{end_time}"
     output
   end
 
@@ -32,7 +39,7 @@ formula_mapping = FormulaMapping.new(data.drop(2))
 
 output =  original_formula
 
-20.times { output = formula_mapping.apply(output) }
+40.times { output = formula_mapping.apply(output) }
 puts output.length
 tally = output.split("").tally
 max = tally.max{|a,b| a[1] <=> b[1] }
