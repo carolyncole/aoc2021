@@ -10,22 +10,19 @@ class FormulaMapping
   end
 
   def apply(input)
-    start_time = DateTime.now
     output = input.clone
-    inserts  = []
-    (0..input.length-2).each do |index|
-      pair = input[index,2]
-      insert = formula_map[pair]
-      unless insert.nil?
-        inserts << { index: index+1, letter: insert }
+    input.each do |key, number|
+      letter = formula_map[key]
+      unless letter.nil?
+        new_key_left = key[0]+letter
+        new_key_right = letter+key[1]
+        output[key] -= number
+        output[new_key_left] ||= 0
+        output[new_key_right] ||= 0
+        output[new_key_left] += number
+        output[new_key_right] += number
       end
     end
-    find_time = DateTime.now
-    output = input.split
-    inserts.each_with_index{|pair, index| output.insert(pair[:index]+index,pair[:letter]) }
-    end_time = DateTime.now
-    output = output.join
-    puts "Times #{start_time} #{find_time} #{end_time}"
     output
   end
 
@@ -37,11 +34,16 @@ end
 original_formula = data.first
 formula_mapping = FormulaMapping.new(data.drop(2))
 
-output =  original_formula
+pairs =  original_formula.split("").each_cons(2)
+output = pairs.map(&:join).tally
 
 40.times { output = formula_mapping.apply(output) }
-puts output.length
-tally = output.split("").tally
-max = tally.max{|a,b| a[1] <=> b[1] }
-min =  tally.min{|a,b| a[1] <=> b[1] }
+tally = {}
+output.each do |key,value| 
+  tally[key[0]]||=0
+  tally[key[0]]+=value
+end
+tally[original_formula.split("").last] +=1
+max = tally.to_a.max{|a,b| a[1] <=> b[1] }
+min =  tally.to_a.min{|a,b| a[1] <=> b[1] }
 puts (max[1] - min[1])
