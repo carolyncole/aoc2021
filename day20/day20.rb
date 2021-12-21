@@ -77,13 +77,13 @@ class Image
 
   def build_filter_index(x,y)
     row1 = if y == 0
-             "000"
+            3.times.map{current_fill}.join
            else
             build_filter_row(y-1, x)
            end
     row2 = build_filter_row(y, x)
     row3 = if y == (image_data.length-1)
-             "000"
+            3.times.map{current_fill}.join
            else
             build_filter_row(y+1, x)
            end
@@ -135,8 +135,7 @@ image = Image.new(data[2..])
 puts filter
 puts image
 
-2.times { image.run_filter(filter)}
+50.times { image.run_filter(filter)}
 
-puts image
+#puts image
 puts image.total_lit
-puts filter.filter_map.length
