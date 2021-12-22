@@ -166,6 +166,23 @@ class NumberPair
     3*@left.magnitude+2*@right.magnitude
   end
     
+  def reduce
+    last_number = ""
+    while (last_number != to_s)
+      last_number = to_s
+      last_total_explosions = -1
+      while (total_explosions > last_total_explosions)
+        last_total_explosions = total_explosions
+        assign_depth(1, self)
+        check_for_explosions
+      end
+      assign_depth(1, self)
+      split
+    end
+    assign_depth(1, self)
+    self  
+  end
+
   def to_s
     "[#{left.to_s},#{right.to_s}]"
   end
@@ -179,39 +196,43 @@ def gen_number(values)
   end
 end
 
+def gen_number_from_str(part_str)
+  parts = JSON.parse part_str
+  NumberPair.new(gen_number(parts[0]), gen_number(parts[1]))
+end
+
 number = nil
 data.each do |part_str|
-  parts = JSON.parse part_str
-  new_number = NumberPair.new(gen_number(parts[0]), gen_number(parts[1]))
+  new_number = gen_number_from_str(part_str)
   if number.nil?
     number = new_number
   else
     # I have no idea why I have to parse the number again.  Something is not getting reset, but this solves that
-    number_str = number.to_s
-    original_parts = JSON.parse number_str
-    original_number = NumberPair.new(gen_number(original_parts[0]), gen_number(original_parts[1])) 
+    original_number = gen_number_from_str(number.to_s)
     number = NumberPair.new(original_number, new_number)
-    # puts number
   end
-  last_number = ""
-  while (last_number != number.to_s)
-    last_number = number.to_s
-    total_explosions = -1
-    while (number.total_explosions > total_explosions)
-      total_explosions = number.total_explosions
-      number.assign_depth(1, number)
-      number.check_for_explosions
-    end
-    number.assign_depth(1, number)
-    number.split
-  end
-  number.assign_depth(1, number)
+  number.reduce
   puts "F #{number}"
-  # byebug
 end
 
 puts number
 puts number.magnitude
+
+magnitudes = []
+data.each do |number1_str|
+  data[1..].each do |number2_str|
+    number1 = gen_number_from_str(number1_str)
+    number2 = gen_number_from_str(number2_str)
+    one_way = NumberPair.new(number1, number2)
+    magnitudes << one_way.reduce.magnitude
+    number1 = gen_number_from_str(number1_str)
+    number2 = gen_number_from_str(number2_str)
+    other_way = NumberPair.new(number2, number1)
+    magnitudes << other_way.reduce.magnitude
+  end
+end
+
+puts magnitudes.max
 
 #[[[[6,7],[7,7]],[[7,0],[7,7]]],[[[7,8],[8,8]],[[8,8],[8,8]]]]
 #[[[[6,7],[6,7]],[[7,7],[0,7]]],[[[8,7],[7,7]],[[8,8],[8,0]]]]
