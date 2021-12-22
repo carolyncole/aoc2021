@@ -179,12 +179,17 @@ data.each do |part_str|
     number = new_number
   else
     number = NumberPair.new(number, new_number)
+    puts number
   end
   last_number = ""
   while (last_number != number.to_s)
     last_number = number.to_s
-    number.assign_depth(1, number)
-    number.check_for_explosions
+    total_explosions = -1
+    while (number.total_explosions > total_explosions)
+      total_explosions = number.total_explosions
+      number.assign_depth(1, number)
+      number.check_for_explosions
+    end
     number.assign_depth(1, number)
     number.split
   end
