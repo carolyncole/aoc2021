@@ -51,6 +51,10 @@ class SnailValue
     @value
   end
 
+  def magnitude
+    @value
+  end
+
 end
 
 class NumberPair
@@ -81,7 +85,7 @@ class NumberPair
     return true if @exit_explosions_now
     @exit_explosions_now = @right.check_for_explosions
     return true if @exit_explosions_now
-    if depth >= 5
+    if depth >= 5 && @left.is_a?(SnailValue) && @right.is_a?(SnailValue)
       parent.explode(self)
       true
     end 
@@ -92,13 +96,13 @@ class NumberPair
     just_split = @left.is_a?(SnailValue) && new_left.is_a?(NumberPair)
     @exit_split_now = @left.exit_split_now
     @left = new_left
-    puts "S       #{root.to_s}" if just_split
+    # puts "S       #{root.to_s}" if just_split
     return self if @exit_split_now
     new_right = @right.split
     @exit_split_now = @right.exit_split_now
     just_split = @right.is_a?(SnailValue) && new_right.is_a?(NumberPair)
     @right = new_right
-    puts "S       #{root.to_s}" if just_split
+    # puts "S       #{root.to_s}" if just_split
     self
   end
 
@@ -116,7 +120,7 @@ class NumberPair
       explode_left(@left)
       @left = SnailValue.new(0, parent: self)
     end
-    puts "E #{child} #{root.to_s}"
+    # puts "E #{child} #{root.to_s}"
   end
 
   def explode_right(child)
@@ -157,6 +161,10 @@ class NumberPair
   def add_right(num)
     @right.add_right(num)
   end
+
+  def magnitude
+    3*@left.magnitude+2*@right.magnitude
+  end
     
   def to_s
     "[#{left.to_s},#{right.to_s}]"
@@ -178,8 +186,12 @@ data.each do |part_str|
   if number.nil?
     number = new_number
   else
-    number = NumberPair.new(number, new_number)
-    puts number
+    # I have no idea why I have to parse the number again.  Something is not getting reset, but this solves that
+    number_str = number.to_s
+    original_parts = JSON.parse number_str
+    original_number = NumberPair.new(gen_number(original_parts[0]), gen_number(original_parts[1])) 
+    number = NumberPair.new(original_number, new_number)
+    # puts number
   end
   last_number = ""
   while (last_number != number.to_s)
@@ -193,8 +205,13 @@ data.each do |part_str|
     number.assign_depth(1, number)
     number.split
   end
+  number.assign_depth(1, number)
   puts "F #{number}"
   # byebug
 end
 
 puts number
+puts number.magnitude
+
+#[[[[6,7],[7,7]],[[7,0],[7,7]]],[[[7,8],[8,8]],[[8,8],[8,8]]]]
+#[[[[6,7],[6,7]],[[7,7],[0,7]]],[[[8,7],[7,7]],[[8,8],[8,0]]]]
