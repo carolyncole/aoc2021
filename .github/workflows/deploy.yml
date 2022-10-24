@@ -29,12 +29,17 @@ jobs:
   greet:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
-
+    env:
+      super_secret: ${{ secrets.SLACK_BOT_TOKEN }}
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     # Runs a single command using the runners shell
     - name: Send greeting
       run: echo "I will be deploying ${{ github.event.inputs.branch }} to ${{ github.event.inputs.environment }}"
+    - if: ${{ env.super_secret != '' }}
+      run: echo 'This step will only run if the secret has a value set.'
+    - if: ${{ env.super_secret == '' }}
+      run: echo 'This step will only run if the secret does not have a value set.'
     - name: Post to a Slack channel
       id: slack
       uses: slackapi/slack-github-action@v1.23.0
