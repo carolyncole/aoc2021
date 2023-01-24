@@ -19,7 +19,7 @@ on:
         # Friendly description to be shown in the UI instead of 'environment'
         description: 'Environment to deploy to (staging|production)'
         # Default value if no value is explicitly provided
-        default: 'staging'
+        default: 'test'
         # Input has to be provided for the workflow to run
         required: true
 
@@ -29,9 +29,27 @@ jobs:
   greet:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
-
+    environment: test
+    env:
+      super_secret: ${{ secrets.SLACK_BOT_TOKEN }}
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     # Runs a single command using the runners shell
     - name: Send greeting
       run: echo "I will be deploying ${{ github.event.inputs.branch }} to ${{ github.event.inputs.environment }}"
+    - if: ${{ env.super_secret != '' }}
+      run: echo 'This step will only run if the secret has a value set.'
+    - if: ${{ env.super_secret == '' }}
+      run: echo 'This step will only run if the secret does not have a value set.'
+    - name: Post to a Slack channel
+      id: slack
+      uses: slackapi/slack-github-action@v1.23.0
+      with:
+        # Slack channel id, channel name, or user id to post message.
+        # See also: https://api.slack.com/methods/chat.postMessage#channels
+        # You can pass in multiple channels to post to by providing a comma-delimited list of channel IDs.
+        channel-id: 'server-alerts'
+        # For posting a simple plain text message
+        slack-message: "GitHub build result: ${{ job.status }}\n${{ github.event }}"
+      env:
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
